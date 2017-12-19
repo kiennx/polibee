@@ -1,13 +1,16 @@
 package polibee.core.background;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Service;
+import polibee.core.PolibeeException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Job Specs")
@@ -57,13 +60,44 @@ public class JobSpecs {
     @Test
     @DisplayName("Có thể giữ nguyên tham số hashmap truyền vào")
     public void shouldBeAbleToRetainHashMap() throws JobException {
-        Map<String, MockServiceCheckTestRunned> test = _context.getBeansOfType(MockServiceCheckTestRunned.class);
-
         Job job = new Job("{\"service\":\"jobSpecs.MockServiceCheckTestRunnedWithParams\",\"method\":\"Test\"," +
                 "\"params\": {\"key\":\"retain\"}}", _context);
         job.execute();
 
         assertEquals(true,JobSpecs._hash.containsKey("key"));
         assertEquals("retain", JobSpecs._hash.get("key"));
+    }
+
+    @Test
+    @DisplayName("Sẽ ném exception khi json data không đúng chuẩn")
+    public void shouldThrowExceptionWhenJsonDataFails() {
+        Executable closureContainingCodeToTest = () -> {
+            Job job = new Job("{\"service\":\"jobSpecs.MockServiceCheckTestRunnedWithParams\",\"method\":\"Test\"," +
+                    "\"params\": {\"key\":\"retain\"}", _context);
+            job.execute();
+        };
+        assertThrows(JobException.class, closureContainingCodeToTest);
+    }
+
+    @Test
+    @DisplayName("Sẽ ném exception khi không tìm thấy service bean")
+    public void shouldThrowExceptionWhenServiceNotFound() {
+        Executable closureContainingCodeToTest = () -> {
+            Job job = new Job("{\"service\":\"jobSpecs.MockServiceCheckTestRunnedWithNoClass\",\"method\":\"Test\"," +
+                    "\"params\": {\"key\":\"retain\"}}", _context);
+            job.execute();
+        };
+        assertThrows(JobException.class, closureContainingCodeToTest);
+    }
+
+    @Test
+    @DisplayName("Sẽ ném exception khi không tìm thấy method")
+    public void shouldThrowExceptionWhenMethodNotFound() {
+        Executable closureContainingCodeToTest = () -> {
+            Job job = new Job("{\"service\":\"jobSpecs.MockServiceCheckTestRunnedWithParams\",\"method\":\"NoSuchMethod\"," +
+                    "\"params\": {\"key\":\"retain\"}}", _context);
+            job.execute();
+        };
+        assertThrows(JobException.class, closureContainingCodeToTest);
     }
 }
