@@ -145,4 +145,27 @@ public class Job {
         }
         return obj;
     }
+
+    /**
+     * Chuyển hóa thành chuỗi Json tượng trưng cho job, tất nhiên sẽ không còn context
+     * @return Chuỗi json tượng trưng cho job, không bao gồm context
+     */
+    @Override
+    public String toString() {
+        return toJsonObject().toString();
+    }
+
+    /**
+     * Chuyển hóa job thành JsonObject tượng trưng cho job
+     * @return Đối tượng JsonObject tượng trưng cho job, không bao gồm context
+     */
+    public JsonObject toJsonObject() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(JSON_SERVICE_BEAN, this._service);
+        jsonObject.addProperty(JSON_METHOD_NAME, this._method);
+        Gson gson = new Gson();
+        jsonObject.addProperty(JSON_PARAMS, gson.toJson(this._params));
+
+        return jsonObject;
+    }
 }
