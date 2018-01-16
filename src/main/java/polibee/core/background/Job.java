@@ -72,6 +72,20 @@ public class Job {
     }
 
     /**
+     * Khởi tạo một job từ thông tin cụ thể
+     * @param service Tên bean service
+     * @param method Tên phương thức
+     * @param params Tham số của job
+     * @param context ApplicationContext thực thi job
+     */
+    public Job(String service, String method, HashMap params, ApplicationContext context) {
+        this._service = service;
+        this._method = method;
+        this._params = params;
+        this._context = context;
+    }
+
+    /**
      * Thực thi Job
      * @throws JobException Exception trong việc thực thi job này
      */
