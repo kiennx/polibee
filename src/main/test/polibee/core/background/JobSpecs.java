@@ -35,6 +35,14 @@ public class JobSpecs {
         }
     }
 
+    @Service
+    class MockServiceCheckTestRunnedWithArrayParams {
+        public void Test(String test, Double d1, Double d2, Boolean True)
+        {
+            JobSpecs._tested = true;
+        }
+    }
+
     @BeforeEach
     public void resetTested() {
         JobSpecs._tested = false;
@@ -46,12 +54,23 @@ public class JobSpecs {
         _context = new AnnotationConfigApplicationContext(JobSpecs.class);
         _context.registerBean(MockServiceCheckTestRunned.class);
         _context.registerBean(MockServiceCheckTestRunnedWithParams.class);
+        _context.registerBean(MockServiceCheckTestRunnedWithArrayParams.class);
     }
 
     @Test
     @DisplayName("Có thể thực thi một phương thức với kiểu params là HashMap theo beanName và method")
     public void shouldBeAbleToExecuteJob() throws Exception {
         Job job = new Job("{\"service\":\"jobSpecs.MockServiceCheckTestRunned\",\"method\":\"Test\",\"params\":\"\"}", _context);
+        job.execute();
+
+        assertEquals(true,JobSpecs._tested);
+    }
+
+    @Test
+    @DisplayName("Có thể thực thi một phương thức với kiểu params là HashMap bên trong chứa array tham số theo beanName và method")
+    public void shouldBeAbleToExecuteJobWithArrayParams() throws JobException {
+        Job job = new Job("{\"service\":\"jobSpecs.MockServiceCheckTestRunnedWithArrayParams\",\"method\":\"Test\"," +
+                "\"params\":{\"params\": [\"test\", 1, 2, true]}}", _context);
         job.execute();
 
         assertEquals(true,JobSpecs._tested);

@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -94,7 +95,7 @@ public class Job {
         Method method = getMethod(obj);
 
         try {
-            method.invoke(obj, this._params);
+            method.invoke(obj, this.getParams());
         } catch (IllegalAccessException e) {
             LOGGER.error("Job could not executed because of an exception when invoke method", e);
             throw new JobException("Phương thức thực thi không hợp lệ, không access được phương thức, không thực thi được job", e);
@@ -117,7 +118,13 @@ public class Job {
     private Method getMethod(Object obj) throws JobException {
         Method method = null;
         try {
-            method = obj.getClass().getMethod(this._method, HashMap.class);
+            Object[] params = this.getParams();
+            Class[] classes = new Class[params.length];
+
+            for (int ii = 0; ii < params.length; ii++) {
+                classes[ii] = params[ii].getClass();
+            }
+            method = obj.getClass().getMethod(this._method, classes);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -144,6 +151,30 @@ public class Job {
             throw new JobException("Không tìm thấy service (bean) để thực thi job", ex);
         }
         return obj;
+    }
+
+    private Object[] getParams() {
+        if (this._params.containsKey("params")) {
+            Object list = this._params.get("params");
+            if (ArrayList.class.isInstance(list)) {
+                ArrayList arrayList = (ArrayList) list;
+                Object[] result = new Object[arrayList.size()];
+                for (int ii = 0; ii < arrayList.size(); ii ++) {
+                    Object value = arrayList.get(ii);
+                    if (String.class.isInstance(value)) {
+                        result[ii] = (String) value;
+                    }
+                    if (Double.class.isInstance(value)) {
+                        result[ii] = (Double) value;
+                    }
+                    if (Boolean.class.isInstance(value)) {
+                        result[ii] = (Boolean) value;
+                    }
+                }
+                return result;
+            }
+        }
+        return new Object[] { this._params};
     }
 
     /**
