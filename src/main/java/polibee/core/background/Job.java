@@ -195,7 +195,7 @@ public class Job {
         jsonObject.addProperty(JSON_SERVICE_BEAN, this._service);
         jsonObject.addProperty(JSON_METHOD_NAME, this._method);
         Gson gson = new Gson();
-        jsonObject.addProperty(JSON_PARAMS, gson.toJson(this._params));
+        jsonObject.add(JSON_PARAMS, gson.toJsonTree(this._params));
 
         return jsonObject;
     }

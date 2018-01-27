@@ -119,4 +119,16 @@ public class JobSpecs {
         };
         assertThrows(JobException.class, closureContainingCodeToTest);
     }
+
+    @Test
+    @DisplayName("Có thể chuyển một job khởi tạo thành dạng json string")
+    public void shouldConvertToValidJson() {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("params", new Object[] {1});
+        Job job = new Job("orderSynchronizationService","syncOrderForCustomer",
+                params, _context);
+
+        String str = job.toString();
+        assertEquals( "{\"service\":\"orderSynchronizationService\",\"method\":\"syncOrderForCustomer\",\"params\":{\"params\":[1]}}",str);
+    }
 }
